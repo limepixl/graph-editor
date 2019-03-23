@@ -66,6 +66,25 @@ int main()
 			{
 				firstClick = true;
 			}
+
+			if(sf::Mouse::isButtonPressed(sf::Mouse::Right))
+			{
+				// Check if the mouse is clicked within the bounds
+				// of a node's circle shape
+				sf::Vector2f pos;
+				sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+				for(auto& n : nodes)
+				{
+					sf::Vector2f center = n.nodeShape.getPosition();
+
+					float distance = std::sqrt(std::pow(mousePos.x - center.x, 2) + std::pow(mousePos.y - center.y, 2));
+					if(distance <= n.radius)
+					{
+						// If mouse was clicked within node
+						std::cout << "INSIDE " << n.name << std::endl;
+					}
+				}
+			}
 		}
 
 		window.clear();
