@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <SFML/Graphics.hpp>
+#include <string>
 
 // A node contains a name and an index.
 struct Node
@@ -9,7 +10,9 @@ struct Node
 	int index;
 
 	float radius = 20.0f;
+
 	sf::CircleShape nodeShape = sf::CircleShape(radius);
+	sf::Text label;
 
 	bool selected;
 };
@@ -21,14 +24,25 @@ struct Link
 	std::vector<Node> nodes;
 	sf::RectangleShape line;
 	int weight;
+
+	bool operator==(const Link& rhs) const
+	{
+		return (nodes[0].name == rhs.nodes[0].name) && (nodes[1].name == rhs.nodes[1].name);
+	}
 };
 
 int main() 
 {
 	// Window creation
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Graph editor");
+	sf::RenderWindow window(sf::VideoMode(1280, 720), "Graph editor");
 	window.setKeyRepeatEnabled(false);
 	window.setFramerateLimit(60);
+
+	sf::Font font;
+	if(!font.loadFromFile("CodeSaver-Regular.otf"))
+	{
+		std::cout << "Failed to load font!" << std::endl;
+	}
 
 	std::vector<Node> nodes;
 	std::vector<Link> links;
@@ -60,6 +74,17 @@ int main()
 				newNode.nodeShape.setPosition(sf::Vector2f(localPosition));
 				newNode.nodeShape.setOrigin(newNode.radius, newNode.radius);
 				newNode.nodeShape.setOutlineColor(sf::Color(255, 0, 0, 255));
+
+				// Set up label
+				sf::Text text;
+				text.setFont(font);
+				text.setString(std::string(1, newNode.name));
+				text.setCharacterSize(40);
+				text.setFillColor(sf::Color::Black);
+				text.setOrigin(11.2f, 27.0f);	// Very specific numbers so text is aligned
+				text.setPosition(sf::Vector2f(localPosition));
+				newNode.label = text;
+
 				nodes.push_back(newNode);	// Add it to vector
 			}
 
@@ -111,21 +136,39 @@ int main()
 						}
 					}
 
+					// Get the positions of both nodes
 					sf::Vector2f firstPos = temp.nodes[0].nodeShape.getPosition();
 					sf::Vector2f secondPos = temp.nodes[1].nodeShape.getPosition();
 
+					// Calculate distance on x and y axes
 					float xdist = secondPos.x - firstPos.x;
 					float ydist = secondPos.y - firstPos.y;
 
+					// Calculate hypotenuse
 					float c = std::sqrt(std::pow(xdist, 2) + std::pow(ydist, 2));
 
+					// Angle between the 2 points
 					float angle = (180 / 3.14159f) * std::atan2(ydist, xdist);
 
-					temp.line = sf::RectangleShape(sf::Vector2f(c, 5.0f));
-					temp.line.setPosition(firstPos);
-					temp.line.rotate(angle);
+					float lineWidth = 5.0f;
+					temp.line = sf::RectangleShape(sf::Vector2f(c, lineWidth));	// Line dimensions
+					temp.line.setPosition(firstPos);							// Starting position (at first node)
+					temp.line.setOrigin(lineWidth * 0.5f, lineWidth * 0.5f);	// Origin so that the line looks centered
+					temp.line.rotate(angle);									// Rotate the line so that it touches the second node
+					temp.line.setFillColor(sf::Color(100, 100, 100, 255));		// Line color
 
-					links.push_back(temp);
+					// If the current link is the same as, or a
+					// reversed copy from a link that already exists,
+					// don't push it to the vector
+					bool duplicate = false;
+					for(auto& l : links)
+					{
+						if(temp == l)
+							duplicate = true;
+					}
+
+					if(!duplicate)
+						links.push_back(temp);
 				}
 			}
 
@@ -158,19 +201,27 @@ int main()
 					}
 				}
 			}
+
+			// Erase all nodes and links
+			if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
+			{
+				links.erase(links.begin(), links.end());
+				nodes.erase(nodes.begin(), nodes.end());
+			}
 		}
 
 		window.clear();
-
-		for(auto& n : nodes)
-		{
-			window.draw(n.nodeShape);
-		}
 
 		for(auto& l : links)
 		{
 			window.draw(l.line);
 		}
+
+		for(auto& n : nodes)
+		{
+			window.draw(n.nodeShape);
+			window.draw(n.label);
+		}		
 		
 		window.display();
 	}
