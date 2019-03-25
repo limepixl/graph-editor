@@ -14,6 +14,8 @@ struct Node
 	sf::CircleShape nodeShape = sf::CircleShape(radius);
 	sf::Text label;
 
+	// Whether the node is selected to 
+	// to be linked with another node
 	bool selected;
 };
 
@@ -21,10 +23,14 @@ struct Node
 // connected, alongside the link's width
 struct Link
 {
-	std::vector<Node> nodes;
-	sf::RectangleShape line;
-	int weight;
+	std::vector<Node> nodes;	// TODO: Probably could be pair
 
+	sf::RectangleShape line;
+	sf::Text label;
+
+	int weight;	// Link's weight (distance)
+
+	// Equals comparison operator overload
 	bool operator==(const Link& rhs) const
 	{
 		return (nodes[0].name == rhs.nodes[0].name) && (nodes[1].name == rhs.nodes[1].name);
@@ -33,8 +39,12 @@ struct Link
 
 int main() 
 {
+	// Window dimensions
+	const int WIDTH = 1280;
+	const int HEIGHT = 720;
+
 	// Window creation
-	sf::RenderWindow window(sf::VideoMode(1280, 720), "Graph editor");
+	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Graph editor");
 	window.setKeyRepeatEnabled(false);
 	window.setFramerateLimit(60);
 
@@ -47,9 +57,15 @@ int main()
 	std::vector<Node> nodes;
 	std::vector<Link> links;
 
+	// Used below to toggle drawing weight labels
+	bool shouldDrawStrengths = false;
+
 	// Used below to discard unnecessary clicks
 	bool firstLeftClick = true;
 	bool firstRightClick = true;
+	bool firstMiddleClick = true;
+
+	// Render loop
 	while(window.isOpen())
 	{
 		// Event polling
@@ -157,6 +173,18 @@ int main()
 					temp.line.rotate(angle);									// Rotate the line so that it touches the second node
 					temp.line.setFillColor(sf::Color(100, 100, 100, 255));		// Line color
 
+					// Line strength label
+					sf::Text text1;
+					text1.setFont(font);
+					text1.setString(std::to_string(static_cast<int>(c)));
+					text1.setFillColor(sf::Color::White);
+					text1.setCharacterSize(25);		
+					text1.setOrigin(16.0f, 17.0f);	// Specific numbers...
+					text1.setPosition(static_cast<int>(firstPos.x + xdist * 0.5f), static_cast<int>(firstPos.y + ydist * 0.5f));
+					// Cast is for text sharpness
+
+					temp.label = text1;
+
 					// If the current link is the same as, or a
 					// reversed copy from a link that already exists,
 					// don't push it to the vector
@@ -176,6 +204,17 @@ int main()
 			if(!sf::Mouse::isButtonPressed(sf::Mouse::Right))
 			{
 				firstRightClick = true;
+			}
+
+			if(sf::Mouse::isButtonPressed(sf::Mouse::Middle) && firstMiddleClick)
+			{
+				shouldDrawStrengths = !shouldDrawStrengths;
+			}
+
+			// This is to prevent 'painting' bug, so one node is placed on each click
+			if(!sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+			{
+				firstMiddleClick = true;
 			}
 
 			// Print debug info
@@ -216,6 +255,12 @@ int main()
 		{
 			window.draw(l.line);
 		}
+
+		if(shouldDrawStrengths)
+			for(auto& l : links)
+			{
+				window.draw(l.label);
+			}
 
 		for(auto& n : nodes)
 		{
