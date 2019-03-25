@@ -1,9 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include <string>
 
-// A node contains a name and an index.
+// A node contains a name and an index
 struct Node
 {
 	char name;
@@ -19,11 +18,11 @@ struct Node
 	bool selected;
 };
 
-// A link contains 2 nodes that need to be
+// A link contains 2 nodes that are
 // connected, alongside the link's width
 struct Link
 {
-	std::vector<Node> nodes;	// TODO: Probably could be pair
+	std::vector<Node> nodes;
 
 	sf::RectangleShape line;
 	sf::Text label;
@@ -33,7 +32,9 @@ struct Link
 	// Equals comparison operator overload
 	bool operator==(const Link& rhs) const
 	{
-		return (nodes[0].name == rhs.nodes[0].name) && (nodes[1].name == rhs.nodes[1].name);
+		bool first = nodes[0].name == rhs.nodes[0].name;
+		bool second = nodes[1].name == rhs.nodes[1].name;
+		return (first && second);
 	}
 };
 
@@ -54,6 +55,7 @@ int main()
 		std::cout << "Failed to load font!" << std::endl;
 	}
 
+	// Vectors to contain created nodes and links
 	std::vector<Node> nodes;
 	std::vector<Link> links;
 
@@ -87,9 +89,10 @@ int main()
 				Node newNode = { (char)(65 + index), index };
 
 				// Set the node's circle position and origin
-				newNode.nodeShape.setPosition(sf::Vector2f(localPosition));
-				newNode.nodeShape.setOrigin(newNode.radius, newNode.radius);
-				newNode.nodeShape.setOutlineColor(sf::Color(255, 0, 0, 255));
+				sf::CircleShape& circle = newNode.nodeShape;
+				circle.setPosition(sf::Vector2f(localPosition));
+				circle.setOrigin(newNode.radius, newNode.radius);
+				circle.setOutlineColor(sf::Color(255, 0, 0, 255));
 
 				// Set up label
 				sf::Text text;
@@ -101,7 +104,7 @@ int main()
 				text.setPosition(sf::Vector2f(localPosition));
 				newNode.label = text;
 
-				nodes.push_back(newNode);	// Add it to vector
+				nodes.push_back(newNode);	// Push it to vector
 			}
 
 			// This is to prevent 'painting' bug, so one node is placed on each click
@@ -141,20 +144,22 @@ int main()
 				// and create a link between the 2 nodes
 				if(sum == 2)
 				{
-					Link temp;
+					Link link;
+
+					// Find the 2 selected nodes
 					for(auto& n : nodes)
 					{
 						if(n.selected)
 						{
-							temp.nodes.push_back(n);
-							n.nodeShape.setOutlineThickness(0.0f);
 							n.selected = false;
+							link.nodes.push_back(n);
+							n.nodeShape.setOutlineThickness(0.0f);	// So the node appears unselected
 						}
 					}
 
 					// Get the positions of both nodes
-					sf::Vector2f firstPos = temp.nodes[0].nodeShape.getPosition();
-					sf::Vector2f secondPos = temp.nodes[1].nodeShape.getPosition();
+					sf::Vector2f firstPos = link.nodes[0].nodeShape.getPosition();
+					sf::Vector2f secondPos = link.nodes[1].nodeShape.getPosition();
 
 					// Calculate distance on x and y axes
 					float xdist = secondPos.x - firstPos.x;
@@ -163,27 +168,26 @@ int main()
 					// Calculate hypotenuse
 					float c = std::sqrt(std::pow(xdist, 2) + std::pow(ydist, 2));
 
-					// Angle between the 2 points
-					float angle = (180 / 3.14159f) * std::atan2(ydist, xdist);
+					// Angle between the 2 points (converted to degrees)
+					float angle = (180.0f / 3.14159f) * std::atan2(ydist, xdist);
 
 					float lineWidth = 5.0f;
-					temp.line = sf::RectangleShape(sf::Vector2f(c, lineWidth));	// Line dimensions
-					temp.line.setPosition(firstPos);							// Starting position (at first node)
-					temp.line.setOrigin(lineWidth * 0.5f, lineWidth * 0.5f);	// Origin so that the line looks centered
-					temp.line.rotate(angle);									// Rotate the line so that it touches the second node
-					temp.line.setFillColor(sf::Color(100, 100, 100, 255));		// Line color
+					link.line = sf::RectangleShape(sf::Vector2f(c, lineWidth));	// Line dimensions
+					link.line.setPosition(firstPos);							// Starting position (at first node)
+					link.line.setOrigin(lineWidth * 0.5f, lineWidth * 0.5f);	// Origin so that the line looks centered
+					link.line.rotate(angle);									// Rotate the line so that it touches the second node
+					link.line.setFillColor(sf::Color(100, 100, 100, 255));		// Line color (grey-ish)
 
 					// Line strength label
-					sf::Text text1;
-					text1.setFont(font);
-					text1.setString(std::to_string(static_cast<int>(c)));
-					text1.setFillColor(sf::Color::White);
-					text1.setCharacterSize(25);		
-					text1.setOrigin(16.0f, 17.0f);	// Specific numbers...
-					text1.setPosition(static_cast<int>(firstPos.x + xdist * 0.5f), static_cast<int>(firstPos.y + ydist * 0.5f));
-					// Cast is for text sharpness
+					sf::Text text;
+					text.setFont(font);
+					text.setString(std::to_string(static_cast<int>(c)));
+					text.setFillColor(sf::Color::White);
+					text.setCharacterSize(25);		
+					text.setOrigin(16.0f, 17.0f);	// Specific numbers...
+					text.setPosition(std::floor(firstPos.x + xdist * 0.5f), std::floor(firstPos.y + ydist * 0.5f));
 
-					temp.label = text1;
+					link.label = text;
 
 					// If the current link is the same as, or a
 					// reversed copy from a link that already exists,
@@ -191,12 +195,12 @@ int main()
 					bool duplicate = false;
 					for(auto& l : links)
 					{
-						if(temp == l)
+						if(link == l)
 							duplicate = true;
 					}
 
 					if(!duplicate)
-						links.push_back(temp);
+						links.push_back(link);
 				}
 			}
 
@@ -208,6 +212,8 @@ int main()
 
 			if(sf::Mouse::isButtonPressed(sf::Mouse::Middle) && firstMiddleClick)
 			{
+				firstMiddleClick = false;
+
 				shouldDrawStrengths = !shouldDrawStrengths;
 			}
 
@@ -230,6 +236,7 @@ int main()
 					std::cout << n.name << std::endl;
 				}
 
+				// No point in printing if no links are present
 				if(!links.empty())
 				{
 					// Print all the created links for debugging
