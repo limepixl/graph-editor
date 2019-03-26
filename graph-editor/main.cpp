@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <SFML/Graphics.hpp>
 
 // A node contains a name and an index
@@ -16,6 +17,12 @@ struct Node
 	// Whether the node is selected to 
 	// to be linked with another node
 	bool selected;
+
+	// Equals comparison operator overload
+	bool operator==(const Node& rhs) const
+	{
+		return (index == rhs.index);
+	}
 };
 
 // A link contains 2 nodes that are
@@ -221,31 +228,6 @@ int main()
 			if(!sf::Mouse::isButtonPressed(sf::Mouse::Middle))
 			{
 				firstMiddleClick = true;
-			}
-
-			// Print debug info
-			if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-			{
-				// Clear console window
-				system("cls");
-
-				// Print all created nodes for debugging
-				std::cout << "Currently created nodes: " << std::endl;
-				for(auto& n : nodes)
-				{
-					std::cout << n.name << std::endl;
-				}
-
-				// No point in printing if no links are present
-				if(!links.empty())
-				{
-					// Print all the created links for debugging
-					std::cout << "Currently created links: " << std::endl;
-					for(auto& l : links)
-					{
-						std::cout << l.nodes[0].name << "----" << l.nodes[1].name << std::endl;
-					}
-				}
 			}
 
 			// Erase all nodes and links
