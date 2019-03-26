@@ -1,49 +1,6 @@
 #include <iostream>
-#include <vector>
-#include <stack>
-#include <SFML/Graphics.hpp>
-
-// A node contains a name and an index
-struct Node
-{
-	char name;
-	int index;
-
-	float radius = 20.0f;
-
-	sf::CircleShape nodeShape = sf::CircleShape(radius);
-	sf::Text label;
-
-	// Whether the node is selected to 
-	// to be linked with another node
-	bool selected;
-
-	// Equals comparison operator overload
-	bool operator==(const Node& rhs) const
-	{
-		return (index == rhs.index);
-	}
-};
-
-// A link contains 2 nodes that are
-// connected, alongside the link's width
-struct Link
-{
-	std::vector<Node> nodes;
-
-	sf::RectangleShape line;
-	sf::Text label;
-
-	int weight;	// Link's weight (distance)
-
-	// Equals comparison operator overload
-	bool operator==(const Link& rhs) const
-	{
-		bool first = nodes[0].name == rhs.nodes[0].name;
-		bool second = nodes[1].name == rhs.nodes[1].name;
-		return (first && second);
-	}
-};
+#include "Node.hpp"
+#include "Link.hpp"
 
 int main() 
 {
