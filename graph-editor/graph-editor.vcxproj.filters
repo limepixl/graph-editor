@@ -18,12 +18,15 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Link\Link.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Node.hpp">
+    <ClInclude Include="Node\Node.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Link.hpp">
+    <ClInclude Include="Link\Link.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

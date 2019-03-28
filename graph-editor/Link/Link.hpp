@@ -1,13 +1,14 @@
 #pragma once
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include "Node.hpp"
+#include "../Node/Node.hpp"
 
 // A link contains 2 nodes that are
 // connected, alongside the link's width
 struct Link
 {
-	std::vector<Node> nodes;
+	Node* first;
+	Node* second;
 
 	sf::RectangleShape line;
 	sf::Text label;
@@ -15,10 +16,5 @@ struct Link
 	int weight;	// Link's weight (distance)
 
 	// Equals comparison operator overload
-	bool operator==(const Link& rhs) const
-	{
-		bool first = nodes[0].name == rhs.nodes[0].name;
-		bool second = nodes[1].name == rhs.nodes[1].name;
-		return (first && second);
-	}
+	bool operator==(const Link& rhs) const;
 };
