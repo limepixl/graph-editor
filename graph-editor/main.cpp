@@ -1,12 +1,15 @@
 #include <iostream>
-#include "Node.hpp"
-#include "Link.hpp"
+#include "Node/Node.hpp"
+#include "Link/Link.hpp"
 
 int main() 
 {
 	// Window dimensions
 	const int WIDTH = 1280;
 	const int HEIGHT = 720;
+
+	// Node radius
+	float radius = 20.0f;
 
 	// Window creation
 	sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Graph editor");
@@ -50,18 +53,14 @@ int main()
 				
 				// Create a new node
 				int index = static_cast<int>(nodes.size());
-				Node newNode = { (char)(65 + index), index };
+				Node newNode = { index };
 
-				// Set the node's circle position and origin
-				sf::CircleShape& circle = newNode.nodeShape;
-				circle.setPosition(sf::Vector2f(localPosition));
-				circle.setOrigin(newNode.radius, newNode.radius);
-				circle.setOutlineColor(sf::Color(255, 0, 0, 255));
-
+				newNode.position = sf::Vector2f(localPosition);
+				
 				// Set up label
 				sf::Text text;
 				text.setFont(font);
-				text.setString(std::string(1, newNode.name));
+				text.setString(std::string(1, static_cast<char>(65 + newNode.index)));
 				text.setCharacterSize(40);
 				text.setFillColor(sf::Color::Black);
 				text.setOrigin(11.2f, 27.0f);	// Very specific numbers so text is aligned
@@ -89,15 +88,14 @@ int main()
 				for(auto& n : nodes)
 				{					
 					// The node's center coordinates
-					sf::Vector2f center = n.nodeShape.getPosition();
+					sf::Vector2f center = n.position;
 
 					// Distance between node's center and cursor's position
 					float distance = std::sqrt(std::pow(mousePos.x - center.x, 2) + std::pow(mousePos.y - center.y, 2));
 
 					// If the mouse is clicked inside the circle
-					if(distance <= n.radius)
+					if(distance <= radius)
 					{
-						n.nodeShape.setOutlineThickness(5.0f);
 						n.selected = true;
 					}
 
@@ -109,21 +107,26 @@ int main()
 				if(sum == 2)
 				{
 					Link link;
+					bool first = true;
 
 					// Find the 2 selected nodes
 					for(auto& n : nodes)
 					{
 						if(n.selected)
 						{
+							if(first)
+								link.first = &n;
+							else
+								link.second = &n;
 							n.selected = false;
-							link.nodes.push_back(n);
-							n.nodeShape.setOutlineThickness(0.0f);	// So the node appears unselected
+
+							first = false;
 						}
 					}
 
 					// Get the positions of both nodes
-					sf::Vector2f firstPos = link.nodes[0].nodeShape.getPosition();
-					sf::Vector2f secondPos = link.nodes[1].nodeShape.getPosition();
+					sf::Vector2f firstPos = link.first->position;
+					sf::Vector2f secondPos = link.second->position;
 
 					// Calculate distance on x and y axes
 					float xdist = secondPos.x - firstPos.x;
@@ -208,9 +211,22 @@ int main()
 				window.draw(l.label);
 			}
 
+		// Create the node shape
+		sf::CircleShape circle(radius);
+		circle.setOutlineColor(sf::Color(255, 0, 0, 255));
+
 		for(auto& n : nodes)
 		{
-			window.draw(n.nodeShape);
+			// Set the position and draw the node at each position
+			circle.setPosition(n.position);
+			circle.setOrigin(radius, radius);
+
+			if(n.selected)
+				circle.setOutlineThickness(5.0f);
+			else
+				circle.setOutlineThickness(0.0f);	// So the node appears unselected
+
+			window.draw(circle);
 			window.draw(n.label);
 		}		
 		
