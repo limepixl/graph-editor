@@ -12,6 +12,10 @@ struct Node
 	// to be linked with another node
 	bool selected;
 
+	// Whether the node has been
+	// visited. Used for traversal
+	bool visited = false;
+
 	// Equals comparison operator overload
 	bool operator==(const Node& rhs) const
 	{

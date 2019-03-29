@@ -11,3 +11,5 @@ This is a simple graph editor made using C++ and SFML.
 - Movable nodes
 - Ability to fill a closed off cycle / loop with a colour
 - Traversal algorithms (DFS, BFS, Dijkstra's algorithm, etc.)
+
+![GraphEditor](https://raw.githubusercontent.com/limepixl/graph-editor/master/gif/grapheditor.gif)
