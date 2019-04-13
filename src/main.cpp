@@ -1,6 +1,7 @@
-#include <iostream>
+﻿#include <iostream>
 #include "Node/Node.hpp"
 #include "Link/Link.hpp"
+#include <cmath>
 
 int main() 
 {
@@ -17,7 +18,7 @@ int main()
 	window.setFramerateLimit(60);
 
 	sf::Font font;
-	if(!font.loadFromFile("CodeSaver-Regular.otf"))
+	if(!font.loadFromFile("../graph-editor/src/font.ttf"))
 	{
 		std::cout << "Failed to load font!" << std::endl;
 	}
@@ -53,7 +54,7 @@ int main()
 				
 				// Create a new node
 				int index = static_cast<int>(nodes.size());
-				Node newNode = { index };
+				Node newNode = {index, sf::Vector2f()};
 
 				newNode.position = sf::Vector2f(localPosition);
 				
@@ -91,7 +92,7 @@ int main()
 					sf::Vector2f center = n.position;
 
 					// Distance between node's center and cursor's position
-					float distance = std::sqrt(std::pow(mousePos.x - center.x, 2) + std::pow(mousePos.y - center.y, 2));
+					float distance = static_cast<float>(std::sqrt(std::pow(mousePos.x - center.x, 2) + std::pow(mousePos.y - center.y, 2)));
 
 					// If the mouse is clicked inside the circle
 					if(distance <= radius)
@@ -133,7 +134,7 @@ int main()
 					float ydist = secondPos.y - firstPos.y;
 
 					// Calculate hypotenuse
-					float c = std::sqrt(std::pow(xdist, 2) + std::pow(ydist, 2));
+					float c = static_cast<float>(std::sqrt(std::pow(xdist, 2) + std::pow(ydist, 2)));
 
 					// Angle between the 2 points (converted to degrees)
 					float angle = (180.0f / 3.14159f) * std::atan2(ydist, xdist);
