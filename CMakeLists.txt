@@ -2,6 +2,7 @@
 
 project(graph-editor)
 
+set(SFML_STATIC_LIBRARIES TRUE)
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 add_executable(${PROJECT_NAME} "src/main.cpp" "src/Link/Link.cpp")

@@ -18,7 +18,7 @@ int main()
 	window.setFramerateLimit(60);
 
 	sf::Font font;
-	if(!font.loadFromFile("../graph-editor/src/font.ttf"))
+	if(!font.loadFromFile("../../src/font.ttf"))
 	{
 		std::cout << "Failed to load font!" << std::endl;
 	}
